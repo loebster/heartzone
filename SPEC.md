@@ -21,16 +21,17 @@ When the user is inside the target heart rate zone, the watch is silent. Haptic 
 
 ## Haptic Patterns
 
-| State | Pattern | Subjective feel | Implementation hint |
+| State | Pattern | Repeat interval | Implementation |
 |---|---|---|---|
-| Inside zone | Silence | "all good" | No action |
-| Below minimum | One long, slow pulse | "sluggish — like you" | Two `.directionDown` haptics in rapid succession to feel like one extended pulse |
-| Above maximum | Three short, fast pulses | "hectic — like you" | Three `.notification` or `.click` haptics with ~150ms gap |
-| Re-entry into zone | Short — long — short | "okay, you're good" | `.click` + `.directionDown` + `.click`, distinct from the warning patterns |
+| Inside zone | Silence | — | No action |
+| Below minimum | 1× `.notification` | Every 60 seconds | Single strong tap |
+| Above maximum | 3× `.notification` with 1s gaps | Every 15 seconds | Three taps, `Task.sleep(for: .seconds(1))` between each |
+| Startup | 3× `.click` + 1× `.notification` | Once, at workout start | "Tick, tick, tick, go!" with 600ms gaps |
+| Re-entry into zone | Silence | — | Cessation of warnings is the signal |
 
-The haptic-mirroring philosophy is "embodied": the vibration mirrors the user's physiological state rather than instructing them what to do. A racing pulse feels hectic, so the haptic feels hectic. A slow pulse feels sluggish, so the haptic feels sluggish.
+Both zone warnings use `.notification` (the strongest available `WKHapticType`). Differentiation is purely by count: 1 tap = below, 3 taps = above. The below-zone interval is longer (60s) because a frequent single tap becomes annoying at traffic lights or other brief stops. Above-zone is more urgent and repeats at 15s.
 
-The exact tactile feel of these patterns must be tuned on real hardware during real rides. A pattern test screen (see below) supports this.
+Note: watchOS does not support CoreHaptics. `WKInterfaceDevice.play()` produces fixed short impulses only — no control over duration or intensity. All patterns are designed around this constraint. `.notification` plays a system sound unless Silent Mode is enabled on the watch.
 
 ## Behavior
 
@@ -39,8 +40,8 @@ The exact tactile feel of these patterns must be tuned on real hardware during r
 1. User opens HeartZone on the watch.
 2. Main screen shows current min/max heart rate and a Start button.
 3. Min/max are adjustable via Digital Crown (tap value to focus, then turn crown).
-4. Tap Start → app begins an `HKWorkoutSession` of type `.cycling`, location `.outdoor`.
-5. During the workout: large, central display of current heart rate, with min/max shown for reference. Stop button.
+4. Tap Start → app requests HealthKit authorization (shows alert if denied), then begins an `HKWorkoutSession` of type `.cycling`, location `.outdoor`. Startup haptic pattern fires.
+5. During the workout: large, central display of current heart rate (color-coded: blue = below, green = in zone, red = above), zone state label, and min/max shown for reference. Stop button.
 6. Tap Stop → workout session ends, data is saved to Apple Health.
 
 ### Zone evaluation
@@ -48,31 +49,31 @@ The exact tactile feel of these patterns must be tuned on real hardware during r
 - Sample the live heart rate from `HKLiveWorkoutBuilder`.
 - Every second, evaluate current state against the configured zone.
 - **Tolerance window:** Only after 5 consecutive seconds outside the zone does the warning cycle begin. Prevents false alarms from short spikes or sensor glitches.
-- **Warning interval:** While outside the zone, fire the appropriate haptic pattern every 15 seconds.
-- **Re-entry:** As soon as heart rate returns inside the zone, fire the re-entry confirmation pattern once, then silence.
+- **Warning interval:** Differs by zone — 15 seconds above zone, 60 seconds below zone. The first warning fires immediately when the tolerance window expires; repeats follow at the zone-specific interval.
+- **Re-entry:** Silent. When heart rate returns inside the zone, warnings stop. The cessation of haptics is itself the signal.
 
 ### State machine (simplified)
 
 ```
-[InZone]     <-- start
+[InZone]     <-- start (fires startup pattern)
    |
    |  HR > max for >= 5s
    v
-[AboveZone] -- every 15s: 3 short pulses
+[AboveZone] -- every 15s: 3× notification
    |
    |  HR back in [min, max]
    v
-[InZone (after re-entry)] -- fire short-long-short once
+[InZone] -- silent
 
 [InZone]
    |
    |  HR < min for >= 5s
    v
-[BelowZone] -- every 15s: 1 long pulse
+[BelowZone] -- every 60s: 1× notification
    |
    |  HR back in [min, max]
    v
-[InZone (after re-entry)] -- fire short-long-short once
+[InZone] -- silent
 ```
 
 ## Defaults
@@ -81,7 +82,8 @@ The exact tactile feel of these patterns must be tuned on real hardware during r
 |---|---|---|
 | Minimum HR | 130 bpm | 50–220 |
 | Maximum HR | 150 bpm | 50–220 |
-| Warning interval | 15 seconds | not user-configurable in v0.1 |
+| Warning interval (above zone) | 15 seconds | not user-configurable in v0.1 |
+| Warning interval (below zone) | 60 seconds | not user-configurable in v0.1 |
 | Tolerance window | 5 seconds | not user-configurable in v0.1 |
 
 Min/max persist across sessions via `@AppStorage` (UserDefaults).
@@ -103,8 +105,8 @@ Min/max persist across sessions via `@AppStorage` (UserDefaults).
 | UI | SwiftUI |
 | Workout session | `HKWorkoutSession` + `HKLiveWorkoutBuilder` |
 | Live heart rate | `HKLiveWorkoutBuilder` data delegate, sampling `HKQuantityType.heartRate` |
-| Haptics | `WKInterfaceDevice.current().play(...)` with `.directionUp`, `.directionDown`, `.notification`, `.click` |
-| Timing | `Timer.scheduledTimer` with 1-second tick for state evaluation; separate dispatch-after for haptic pattern sequences |
+| Haptics | `WKInterfaceDevice.current().play(...)` with `.notification` and `.click` |
+| Timing | `Timer.scheduledTimer` with 1-second tick for state evaluation; `Task.sleep` for haptic pattern sequences |
 | Persistence | `@AppStorage` (UserDefaults) for min, max, last-used values |
 
 ## Edge Cases (explicit handling in v0.1)
@@ -114,16 +116,22 @@ Min/max persist across sessions via `@AppStorage` (UserDefaults).
 3. **Watch display darkens during workout** → Workout continues in background due to Workout Processing entitlement. Haptics still fire.
 4. **App force-quit during session** → Not handled in v0.1. User must restart manually. Workout data up to that point is lost.
 5. **Low battery** → No special handling. Standard watchOS behavior applies.
+6. **HealthKit permission denied** → Alert shown with guidance to enable access in Settings. Workout does not start.
 
 ## Pattern Test Screen
 
-A separate screen accessible from the main view (button: "Test Patterns"). Three buttons:
+A separate screen accessible from the main view (button: "Test Patterns"). Two sections:
 
-- "Test: Below zone" → fires the long-slow pattern
-- "Test: Above zone" → fires the three-fast-pulses pattern
-- "Test: Re-entry" → fires the short-long-short pattern
+**Composed patterns:**
+- "Unter Zone" → fires 1× `.notification`
+- "Über Zone" → fires 3× `.notification` with 1s gaps
+- "Startup" → fires tick-tick-tick-go pattern
 
-Purpose: Allow the user to feel each pattern outside of a real workout, both for familiarization and for tuning. If a pattern feels wrong on real hardware, this is the iteration loop.
+**Individual haptic types:**
+- "notification" → single `.notification`
+- "click" → single `.click`
+
+Purpose: Allow the user to feel each pattern outside of a real workout, both for familiarization and for tuning.
 
 ## Explicit non-goals for v0.1
 

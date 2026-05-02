@@ -65,15 +65,15 @@ The user may not notice when they return to the zone, since silence is the only 
 | `ContentView.swift` | All views: config, workout, pattern test (~147 lines) |
 | `HeartzoneApp.swift` | App entry point (unchanged) |
 | `Heartzone-Watch-App-Info.plist` | HealthKit usage descriptions, background modes |
-| `SPEC.md` | Original spec — **partially outdated** regarding haptic patterns |
-| `DECISIONS.md` | Architecture decisions — still accurate for non-haptic decisions |
+| `SPEC.md` | Functional specification — aligned with v0.1 implementation |
+| `DECISIONS.md` | Architecture decision log — includes original and superseded entries |
 | `BACKLOG.md` | Future features — unchanged, still valid |
 
 ## Recommended next steps
 
 1. **Real ride test** — 30+ minute cycling session. Primary question: are the haptic patterns noticeable and distinct enough while riding?
-2. **Update SPEC.md** — Align the haptic pattern section with what was actually built
-3. **Update DECISIONS.md** — Add entries for: pattern redesign rationale, 60s below-zone interval, re-entry removal
+2. ~~**Update SPEC.md**~~ — Done (2026-05-02)
+3. ~~**Update DECISIONS.md**~~ — Done (2026-05-02)
 4. **Consider from BACKLOG.md for v0.2:**
    - Tap-to-snooze (cheap to build, solves the traffic light problem better than 60s interval)
    - Quick-adjust during workout (Crown shifts zone up/down)

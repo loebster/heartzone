@@ -4,6 +4,38 @@ A running log of decisions made during the project, with reasoning. Add new entr
 
 ---
 
+## 2026-05-02: Haptic pattern redesign after hardware reality check
+
+**Decision:** Abandon the "embodied mirror" pattern design. Differentiate zones purely by tap count: 1× `.notification` for below zone, 3× `.notification` for above zone. Both use the same haptic type (`.notification`, the strongest available).
+
+**Rationale:** The original design required varying haptic duration and intensity — a "long, slow pulse" for below zone and "three short, fast pulses" for above. watchOS does not support CoreHaptics; `WKInterfaceDevice.play()` produces only fixed short impulses with no control over duration or intensity. After 4 rounds of real-watch iteration, the distinction by count proved to be the most reliably perceptible approach within the platform's constraints.
+
+**Alternatives considered:**
+- Using different `WKHapticType` values for each zone (`.directionUp` vs. `.directionDown`). Tested; the types felt too similar and too faint during cycling to be distinguished.
+- Rapid-fire sequences with short gaps (150ms). Tested; calls closer than ~600ms cancel each other or blend into an indistinct mush per Apple's documentation (minimum 100ms enforced delay).
+
+---
+
+## 2026-05-02: Below-zone warning interval changed to 60 seconds
+
+**Decision:** Below-zone warnings repeat every 60 seconds. Above-zone warnings remain at 15 seconds.
+
+**Rationale:** During real-watch testing, the 15-second interval for below-zone was immediately annoying at traffic lights and other brief stops. Being below the zone is typically a lower-urgency situation (standing, waiting, coasting). Being above the zone is more urgent (overexertion risk), so it keeps the shorter 15-second interval.
+
+---
+
+## 2026-05-02: Re-entry haptic pattern removed
+
+**Decision:** No haptic fires when the user returns to the zone from above or below. Silence is the re-entry signal.
+
+**Rationale:** User decision during testing: "Nicht zu viele Alerts. Auch kein Re-entry." The cessation of warning haptics is itself an unambiguous signal. Adding a confirmation tap on re-entry would increase overall haptic noise without meaningful benefit, particularly during zone-boundary oscillation.
+
+**Alternatives considered:**
+- Single `.success` tap on re-entry. Tested early; felt too similar to system notifications and added noise.
+- The original short-long-short pattern. Never deployed to hardware — superseded before real-world testing due to the broader pattern redesign.
+
+---
+
 ## 2026-04-29: Haptic semantics — "embodied mirror" instead of "instructive command"
 
 **Decision:** The haptic pattern mirrors the user's physiological state (sluggish pulse for too-low HR, hectic pulses for too-high HR) rather than instructing the user what to do (e.g., "down-arrow" for too-high meaning "slow down").
@@ -12,6 +44,8 @@ A running log of decisions made during the project, with reasoning. Add new entr
 
 **Alternatives considered:**
 - "Instruction" model: 1× `.directionUp` for too-low ("speed up"), 2× `.directionDown` for too-high ("slow down"). Cleaner mapping in theory, but adds a translation step in the user's head.
+
+**Superseded 2026-05-02** — see "Haptic pattern redesign after hardware reality check" above.
 
 ---
 
@@ -24,6 +58,8 @@ A running log of decisions made during the project, with reasoning. Add new entr
 **Alternatives considered:**
 - Pure silence on re-entry. Argued: cessation of warning is itself the signal. Rejected because explicit confirmation is more reassuring during a focused activity.
 - A simple `.success` haptic. Rejected because it might be confused with system notifications.
+
+**Superseded 2026-05-02** — see "Re-entry haptic pattern removed" above.
 
 ---
 
