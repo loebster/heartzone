@@ -4,6 +4,34 @@ A running log of decisions made during the project, with reasoning. Add new entr
 
 ---
 
+## 2026-05-02: Plan mode — preset templates on the watch
+
+**Decision:** Implement structured workout plans as preset templates on the watch with Crown-adjustable parameters per phase. No iPhone companion, no custom plan builder.
+
+**Rationale:** The watch Crown proved effective for single-zone configuration. Two preset templates (Tempo 30 min, Intervall 4×4 min) cover the most common structured training patterns. Phase HR zones are editable before starting, giving flexibility without the complexity of a full plan editor. Avoids the iPhone-companion question entirely.
+
+**Alternatives considered:**
+- Full custom plan builder on the watch (add/remove/reorder phases). Rejected: too complex for the watch screen, and presets cover the main use cases.
+- iPhone companion for plan editing. Rejected: contradicts the watch-only philosophy and adds ~2.5× engineering effort.
+
+---
+
+## 2026-05-02: Above-zone haptic changed to `.failure`
+
+**Decision:** Above-zone warning now uses 3× `.failure` instead of 3× `.notification`.
+
+**Rationale:** After testing all 9 available `WKHapticType` values on a real watch, `.failure` felt distinctly different from `.notification` (used for below-zone). This gives tactile differentiation beyond just tap count. Below-zone remains 1× `.notification`.
+
+---
+
+## 2026-05-02: Workout view redesign with gauge and zone coloring
+
+**Decision:** Replace the minimal workout display with a color-coded gauge, zone-colored background, and plan phase information. Remove the "Workout" navigation title.
+
+**Rationale:** The original workout view was functional but visually sparse — just a number, a text range, and a Stop button. The linear gauge with zone-colored gradient (blue → green → red) gives immediate visual context at a glance. The subtle background tint reinforces zone state without being distracting. Removing the navigation title frees space for the heart rate to be more prominent. Plan mode information (phase label, counter, time remaining) fits naturally below the gauge.
+
+---
+
 ## 2026-05-02: Haptic pattern redesign after hardware reality check
 
 **Decision:** Abandon the "embodied mirror" pattern design. Differentiate zones purely by tap count: 1× `.notification` for below zone, 3× `.notification` for above zone. Both use the same haptic type (`.notification`, the strongest available).

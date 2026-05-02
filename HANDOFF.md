@@ -1,6 +1,6 @@
-# HeartZone v0.1 — Handoff Notes
+# HeartZone — Handoff Notes
 
-Session date: 2026-05-02. Written for the next planning/implementation session.
+Last updated: 2026-05-02. Written for the next planning/implementation session.
 
 ---
 
@@ -57,24 +57,39 @@ Even `.notification` (the strongest type) produces a very short impulse. During 
 ### No re-entry confirmation
 The user may not notice when they return to the zone, since silence is the only signal. Monitor in real rides whether this causes confusion. If it does, consider adding back a single tap on re-entry.
 
+## What was added in v0.2 session (2026-05-02)
+
+### Plan Mode
+- Two preset workout templates: Tempo (30 min, 3 phases) and Intervall (4×4 min, 9 phases)
+- Each phase has its own HR zone, adjustable via Digital Crown before starting
+- Timed phases auto-advance; open-ended phases have a "Next" button
+- Zone state and tolerance counters reset on phase transitions
+
+### Workout View redesign
+- Linear gauge with zone-colored gradient (blue → green → red)
+- Subtle zone-colored background via `.containerBackground`
+- Plan mode shows phase label, counter, and time remaining
+- "Workout" navigation title removed for more space
+- Above-zone haptic changed from `.notification` to `.failure` for better differentiation
+
+### SwiftUI Previews
+- 5 named previews for local testing without deploying to watch: In Zone, Above Zone, Below Zone, Plan Mode, Start Screen
+
 ## Files overview
 
 | File | Purpose |
 |------|---------|
-| `WorkoutManager.swift` | HealthKit session, zone state machine, haptic patterns (~195 lines) |
-| `ContentView.swift` | All views: config, workout, pattern test (~147 lines) |
+| `WorkoutManager.swift` | HealthKit session, zone state machine, haptic patterns, plan/phase logic, presets (~300 lines) |
+| `ContentView.swift` | All views: start screen, workout, plan list, plan detail, phase editor, haptic test (commented out), previews (~435 lines) |
 | `HeartzoneApp.swift` | App entry point (unchanged) |
-| `Heartzone-Watch-App-Info.plist` | HealthKit usage descriptions, background modes |
-| `SPEC.md` | Functional specification — aligned with v0.1 implementation |
+| `SPEC.md` | Functional specification — aligned with current implementation |
 | `DECISIONS.md` | Architecture decision log — includes original and superseded entries |
-| `BACKLOG.md` | Future features — unchanged, still valid |
+| `BACKLOG.md` | Future features |
 
 ## Recommended next steps
 
-1. **Real ride test** — 30+ minute cycling session. Primary question: are the haptic patterns noticeable and distinct enough while riding?
-2. ~~**Update SPEC.md**~~ — Done (2026-05-02)
-3. ~~**Update DECISIONS.md**~~ — Done (2026-05-02)
-4. **Consider from BACKLOG.md for v0.2:**
+1. **Real ride test** — test both simple mode and plan mode on a 30+ minute ride
+2. **Consider from BACKLOG.md:**
    - Tap-to-snooze (cheap to build, solves the traffic light problem better than 60s interval)
    - Quick-adjust during workout (Crown shifts zone up/down)
    - End-of-workout summary

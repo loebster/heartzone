@@ -106,11 +106,9 @@ Instead of "Great, you spent 72% in zone!" — say "You wasted 18% of training t
 
 ---
 
-### Interval training plans
+### ~~Interval training plans~~ ✓ DONE
 
-Phase A: 4 min in zone X. Phase B: 1 min in zone Y. Repeat. Pre-configurable.
-
-**Why later, not now:** This is the natural v0.2 direction if v0.1 proves the concept. Probably the first major feature addition. Triggers the iPhone-companion question because plan editing on the watch is painful.
+Implemented in v0.2 as "Plan Mode" with two preset templates (Tempo, Intervall). Phase editing on the watch works via Digital Crown — no iPhone companion needed.
 
 ---
 

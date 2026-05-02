@@ -118,26 +118,41 @@ Min/max persist across sessions via `@AppStorage` (UserDefaults).
 5. **Low battery** → No special handling. Standard watchOS behavior applies.
 6. **HealthKit permission denied** → Alert shown with guidance to enable access in Settings. Workout does not start.
 
-## Pattern Test Screen
+## Plan Mode (Structured Workouts)
 
-A separate screen accessible from the main view (button: "Test Patterns"). Two sections:
+In addition to the simple single-zone mode, the app supports structured workout plans with multiple phases.
 
-**Composed patterns:**
-- "Unter Zone" → fires 1× `.notification`
-- "Über Zone" → fires 3× `.notification` with 1s gaps
-- "Startup" → fires tick-tick-tick-go pattern
+### Presets
 
-**Individual haptic types:**
-- "notification" → single `.notification`
-- "click" → single `.click`
+Two built-in templates:
 
-Purpose: Allow the user to feel each pattern outside of a real workout, both for familiarization and for tuning.
+| Plan | Phases | Description |
+|------|--------|-------------|
+| Tempo | 3 phases | 5 min warmup → 20 min tempo → 5 min cooldown |
+| Intervall | 9 phases | Warmup → 4× (4 min high + 2 min recovery) → Cooldown |
 
-## Explicit non-goals for v0.1
+### Plan behavior
 
-The following are intentionally **not** included in v0.1, even if technically feasible:
+- Each phase has its own HR zone (min/max), adjustable via Digital Crown before starting
+- Timed phases auto-advance when their duration expires
+- Open-ended phases (warmup/cooldown with ∞ duration) require manual "Next" tap
+- Zone state, tolerance counters, and warnings reset on phase transitions
+- Startup haptic fires on each phase change
+- Last phase stays active until the user taps Stop
 
-- Interval training plans (phased zones over time)
+### Workout View (during workout)
+
+- Large heart rate number, color-coded (blue = below, green = in zone, red = above)
+- Zone state label ("IN ZONE" / "BELOW" / "ABOVE")
+- Linear gauge with zone-colored gradient (blue → green → red) showing HR position
+- Subtle background color matching zone state
+- In plan mode: phase label, phase counter (e.g. "2/3"), time remaining or ∞
+- "Next" button (only for open-ended phases), "Stop" button
+
+## Explicit non-goals
+
+The following are intentionally **not** included, even if technically feasible:
+
 - Multiple saved profiles (city ride, tempo, endurance)
 - iPhone companion app
 - Watchface complications
@@ -160,7 +175,7 @@ The success criteria for v0.1 cannot be evaluated in the simulator. The patterns
 
 ## Versioning
 
-This is **v0.1**. The version number does not refer to App Store releases (there are none planned yet) but to internal milestones.
+Version numbers refer to internal milestones, not App Store releases.
 
 - **v0.1** — minimum viable feedback app, single zone, fixed timing, manual config on watch
-- **v0.2** — open, will be informed by real-world testing of v0.1
+- **v0.2** — plan mode (structured workouts with multi-phase intervals), gauge UI, workout view redesign
