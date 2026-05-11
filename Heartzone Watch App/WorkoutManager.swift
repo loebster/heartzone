@@ -1,51 +1,112 @@
 import HealthKit
 import Observation
+import SwiftUI
 import WatchKit
 
 enum ZoneState {
     case inZone, aboveZone, belowZone
 }
 
-struct WorkoutPhase: Identifiable {
-    let id = UUID()
-    var duration: TimeInterval?
+struct Phase: Codable, Identifiable {
+    var id = UUID()
+    var name: String
     var minHR: Int
     var maxHR: Int
-    var label: String
+    var duration: TimeInterval?
 }
 
-struct WorkoutPlan: Identifiable {
-    let id = UUID()
-    let name: String
-    let description: String
-    var phases: [WorkoutPhase]
+struct Plan: Codable, Identifiable {
+    var id = UUID()
+    var name: String
+    var phases: [Phase]
+}
 
-    static let presets: [WorkoutPlan] = [
-        WorkoutPlan(
-            name: "Tempo",
-            description: "30 min",
-            phases: [
-                WorkoutPhase(duration: 300, minHR: 110, maxHR: 130, label: "Warmup"),
-                WorkoutPhase(duration: 1200, minHR: 145, maxHR: 165, label: "Tempo"),
-                WorkoutPhase(duration: 300, minHR: 110, maxHR: 130, label: "Cooldown"),
-            ]
-        ),
-        WorkoutPlan(
-            name: "Intervall",
-            description: "4×4 min",
-            phases: [
-                WorkoutPhase(duration: nil, minHR: 110, maxHR: 130, label: "Warmup"),
-                WorkoutPhase(duration: 240, minHR: 155, maxHR: 175, label: "Belastung"),
-                WorkoutPhase(duration: 120, minHR: 120, maxHR: 140, label: "Erholung"),
-                WorkoutPhase(duration: 240, minHR: 155, maxHR: 175, label: "Belastung"),
-                WorkoutPhase(duration: 120, minHR: 120, maxHR: 140, label: "Erholung"),
-                WorkoutPhase(duration: 240, minHR: 155, maxHR: 175, label: "Belastung"),
-                WorkoutPhase(duration: 120, minHR: 120, maxHR: 140, label: "Erholung"),
-                WorkoutPhase(duration: 240, minHR: 155, maxHR: 175, label: "Belastung"),
-                WorkoutPhase(duration: nil, minHR: 110, maxHR: 130, label: "Cooldown"),
-            ]
-        ),
+enum PlanNames {
+    static let plans: [String] = [
+        "Custom A", "Custom B", "Custom C", "Tempo", "Intervall", "Endurance",
+        "Recovery Ride", "Threshold", "Long Ride", "Easy Day", "Race Pace",
+        "Sunday Roller", "Hill Hunter", "Pace Pusher", "Cruise Mode", "Vento",
+        "Solo Break", "Domestique", "Climber", "Schmerzgrenze", "Espresso Ride",
+        "Pretzel Legs", "Lactate Shuttle", "Watt's Up",
     ]
+
+    static let phases: [String] = [
+        "Warm-up", "Easy", "Tempo", "Threshold", "Sweet Spot", "Interval",
+        "Surge", "Recovery", "Active Rest", "Cooldown", "Free", "Push",
+    ]
+}
+
+@Observable
+class PlanStore {
+    var plans: [Plan] = []
+
+    init() {
+        load()
+        seedIfNeeded()
+    }
+
+    func save() {
+        guard let data = try? JSONEncoder().encode(plans) else { return }
+        UserDefaults.standard.set(data, forKey: "savedPlans")
+    }
+
+    func availablePlanNames(excluding currentName: String? = nil) -> [String] {
+        let usedNames = Set(plans.map(\.name))
+        var available = PlanNames.plans.filter { !usedNames.contains($0) }
+        if let current = currentName, !available.contains(current) {
+            available.insert(current, at: 0)
+        }
+        if available.isEmpty {
+            var code = UnicodeScalar("D").value
+            while usedNames.contains("Custom \(UnicodeScalar(code)!)") { code += 1 }
+            available.append("Custom \(UnicodeScalar(code)!)")
+        }
+        return available
+    }
+
+    @discardableResult
+    func addPlan() -> Plan {
+        let name = availablePlanNames().first ?? "Custom"
+        let plan = Plan(name: name, phases: [])
+        plans.append(plan)
+        save()
+        return plan
+    }
+
+    func deletePlan(at offsets: IndexSet) {
+        plans.remove(atOffsets: offsets)
+        save()
+    }
+
+    private func load() {
+        guard let data = UserDefaults.standard.data(forKey: "savedPlans"),
+              let decoded = try? JSONDecoder().decode([Plan].self, from: data) else { return }
+        plans = decoded
+    }
+
+    private func seedIfNeeded() {
+        guard !UserDefaults.standard.bool(forKey: "plansSeeded") else { return }
+        plans = [
+            Plan(name: "Tempo", phases: [
+                Phase(name: "Warm-up", minHR: 110, maxHR: 125, duration: 300),
+                Phase(name: "Tempo", minHR: 140, maxHR: 155, duration: 1200),
+                Phase(name: "Cooldown", minHR: 110, maxHR: 125, duration: 300),
+            ]),
+            Plan(name: "Intervall", phases: [
+                Phase(name: "Warm-up", minHR: 110, maxHR: 125, duration: 300),
+                Phase(name: "Interval", minHR: 160, maxHR: 175, duration: 240),
+                Phase(name: "Recovery", minHR: 120, maxHR: 135, duration: 120),
+                Phase(name: "Interval", minHR: 160, maxHR: 175, duration: 240),
+                Phase(name: "Recovery", minHR: 120, maxHR: 135, duration: 120),
+                Phase(name: "Interval", minHR: 160, maxHR: 175, duration: 240),
+                Phase(name: "Recovery", minHR: 120, maxHR: 135, duration: 120),
+                Phase(name: "Interval", minHR: 160, maxHR: 175, duration: 240),
+                Phase(name: "Cooldown", minHR: 110, maxHR: 125, duration: 300),
+            ]),
+        ]
+        UserDefaults.standard.set(true, forKey: "plansSeeded")
+        save()
+    }
 }
 
 @Observable
@@ -61,13 +122,13 @@ class WorkoutManager: NSObject {
     var minHR = 130
     var maxHR = 150
 
-    var phases: [WorkoutPhase] = []
+    var phases: [Phase] = []
     var currentPhaseIndex = 0
     var phaseElapsedSeconds = 0
 
     var isPlanMode: Bool { !phases.isEmpty }
 
-    var currentPhase: WorkoutPhase? {
+    var currentPhase: Phase? {
         guard isPlanMode, currentPhaseIndex < phases.count else { return nil }
         return phases[currentPhaseIndex]
     }
@@ -100,7 +161,7 @@ class WorkoutManager: NSObject {
         do { try await beginWorkoutSession() } catch {}
     }
 
-    func startPlanWorkout(phases: [WorkoutPhase]) async {
+    func startPlanWorkout(phases: [Phase]) async {
         self.phases = phases
         self.currentPhaseIndex = 0
         self.phaseElapsedSeconds = 0
@@ -157,7 +218,6 @@ class WorkoutManager: NSObject {
     private func stopZoneEvaluation() {
         evaluationTimer?.invalidate()
         evaluationTimer = nil
-        zoneState = .inZone
         secondsOutsideZone = 0
         secondsSinceLastWarning = 0
     }
@@ -235,7 +295,7 @@ class WorkoutManager: NSObject {
         secondsSinceLastWarning = 0
 
         playStartupPattern()
-        print("Phase advance: → \(phase.label) (\(currentPhaseIndex + 1)/\(phases.count))")
+        print("Phase advance: → \(phase.name) (\(currentPhaseIndex + 1)/\(phases.count))")
     }
 
     // MARK: - Haptic patterns

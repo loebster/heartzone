@@ -64,6 +64,57 @@ Short, non-voice tones — low note for "too low", high note for "too high". Off
 
 ---
 
+### Apple Ecosystem Integration
+
+Placeholder for a cluster of integration points with the broader Apple ecosystem. Each item is its own topic with distinct trade-offs — to be triaged individually in a future planning session.
+
+Possible directions:
+- Watchface complication (quick-start from watch face)
+- Shortcuts / Siri ("Start HeartZone with Tempo plan")
+- Apple Fitness+ integration (if API exists)
+- Workout export with richer metadata (zone percentages as custom metric)
+- Activity Rings contribution displayed correctly
+- Focus Modes (HeartZone active → Workout Focus auto-on)
+- Live Activities on iPhone during workout
+- Handoff between Watch and iPhone
+
+**Why uncertain:** Some of these align well with the watch-only philosophy (complication, Shortcuts), others contradict it (iPhone Live Activity, Handoff). Need to evaluate each on its own merits. Collecting now, triaging later.
+
+---
+
+### Zifferblatt-Komplikation
+
+Tap auf die HeartZone-Komplikation öffnet die App direkt im Start-Screen (oder noch besser: startet das letzte verwendete Workout/Plan sofort). Spart den Umweg über die App-Liste — bei kalten Fingern oder Handschuhen am Lenker ein echter Gewinn.
+
+Technisch: WidgetKit mit `ComplicationFamily`-Support für die gängigen Zifferblatt-Größen (rectangular, circular, corner).
+
+**Why later:** Nice-to-have, aber funktional ersetzt durch das aktuelle "App-Liste → tap"-Pattern. Wird wertvoll, wenn HeartZone der bevorzugte Workout-Starter wird.
+
+---
+
+### Auto-Detection-Übernahme
+
+Wenn die Watch automatisch Cycling erkennt und die "Start Workout?"-Notification zeigt, könnte HeartZone als alternative Aktion angeboten werden — statt nur Apple's eigene Workout-App. Auswahl per Tap auf "Start with HeartZone".
+
+Technisch unklar: ob Apple Apps Dritter überhaupt in dieser Auto-Detection-UI listet. Vermutlich nicht direkt — die Notification ist Apple-eigen. Alternative: HeartZone reagiert auf Motion-Daten selbst und schlägt vor, ein Workout zu starten, mit eigenem UI-Pattern.
+
+**Why later:** Nicht trivial. Apples Notification-UI ist nicht erweiterbar für Drittanbieter. Eigene Motion-Detection wäre die einzige Option, kostet Energie und ist nur sinnvoll, wenn man HeartZone als Standard-Workout-App nutzt. Erst überlegen, wenn das real ein Bedürfnis ist.
+
+---
+
+### Siri-Shortcuts
+
+Voice-aktiviertes Starten von Workouts und Plänen. Beispiele:
+- "Hey Siri, start HeartZone"
+- "Hey Siri, start Tempo plan"
+- "Hey Siri, start HeartZone with Custom A"
+
+Technisch: App Intents mit Phase-Parametern, registriert für Siri und Shortcuts-App.
+
+**Why later:** Auf der Watch beim Radfahren kaum praktikabel — Siri-Erkennung im Wind unzuverlässig, "Hey Siri" mit verzerrter Stimme nach Anstieg ungenau. Wertvoller fürs iPhone vor der Tour: "Siri, start Endurance plan when I get on my bike." Aber das setzt iPhone-Companion voraus, was wir bewusst nicht machen. Möglicherweise relevant, falls sich die Watch-only-Entscheidung mal ändert.
+
+---
+
 ### Eskalations-Pattern (3 levels deep above zone)
 
 If the user is above max for >2 minutes, escalate to a more urgent pattern.

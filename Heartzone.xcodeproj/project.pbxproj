@@ -8,6 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		E15A1F5D2FA166890086E321 /* Heartzone Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = E15A1F5C2FA166890086E321 /* Heartzone Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		E1875D292FA6927200DDE52F /* HANDOFF.md in Resources */ = {isa = PBXBuildFile; fileRef = E1875D262FA6927200DDE52F /* HANDOFF.md */; };
+		E1875D2A2FA6927200DDE52F /* BACKLOG.md in Resources */ = {isa = PBXBuildFile; fileRef = E1875D242FA6927200DDE52F /* BACKLOG.md */; };
+		E1875D2B2FA6927200DDE52F /* DECISIONS.md in Resources */ = {isa = PBXBuildFile; fileRef = E1875D252FA6927200DDE52F /* DECISIONS.md */; };
+		E1875D2C2FA6927200DDE52F /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = E1875D272FA6927200DDE52F /* README.md */; };
+		E1875D2D2FA6927200DDE52F /* SPEC.md in Resources */ = {isa = PBXBuildFile; fileRef = E1875D282FA6927200DDE52F /* SPEC.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -37,6 +42,11 @@
 /* Begin PBXFileReference section */
 		E15A1F562FA166890086E321 /* Heartzone.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Heartzone.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E15A1F5C2FA166890086E321 /* Heartzone Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Heartzone Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E1875D242FA6927200DDE52F /* BACKLOG.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = BACKLOG.md; sourceTree = "<group>"; };
+		E1875D252FA6927200DDE52F /* DECISIONS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = DECISIONS.md; sourceTree = "<group>"; };
+		E1875D262FA6927200DDE52F /* HANDOFF.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = HANDOFF.md; sourceTree = "<group>"; };
+		E1875D272FA6927200DDE52F /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		E1875D282FA6927200DDE52F /* SPEC.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SPEC.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -61,6 +71,11 @@
 		E15A1F4F2FA166890086E321 = {
 			isa = PBXGroup;
 			children = (
+				E1875D242FA6927200DDE52F /* BACKLOG.md */,
+				E1875D252FA6927200DDE52F /* DECISIONS.md */,
+				E1875D262FA6927200DDE52F /* HANDOFF.md */,
+				E1875D272FA6927200DDE52F /* README.md */,
+				E1875D282FA6927200DDE52F /* SPEC.md */,
 				E15A1F602FA166890086E321 /* Heartzone Watch App */,
 				E15A1F572FA166890086E321 /* Products */,
 			);
@@ -169,6 +184,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E1875D292FA6927200DDE52F /* HANDOFF.md in Resources */,
+				E1875D2A2FA6927200DDE52F /* BACKLOG.md in Resources */,
+				E1875D2B2FA6927200DDE52F /* DECISIONS.md in Resources */,
+				E1875D2C2FA6927200DDE52F /* README.md in Resources */,
+				E1875D2D2FA6927200DDE52F /* SPEC.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -321,7 +341,10 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Heartzone-Watch-App-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = HeartZone;
+				INFOPLIST_KEY_CFBundleDisplayName = ZoneNudge;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "HeartZone reads your heart rate during cycling workouts to provide zone-based haptic feedback.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "HeartZone saves your cycling workouts to the Health app.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKWatchOnly = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -356,7 +379,10 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Heartzone-Watch-App-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = HeartZone;
+				INFOPLIST_KEY_CFBundleDisplayName = ZoneNudge;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "HeartZone reads your heart rate during cycling workouts to provide zone-based haptic feedback.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "HeartZone saves your cycling workouts to the Health app.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKWatchOnly = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
